@@ -148,7 +148,7 @@ def publications():
 def contact():
     st.title("📬 Contact")
     st.write("👨🏻‍🔬 Gift Mello")
-    st.write("✍🏻 BSc (Physical Sciences), BSc Hons (Chemistry) (with distiction), MSc Chemistry (in progress)")
+    st.write("✍🏻 BSc (Physical Sciences) | BSc Hons (Chemistry) (with distinction) | MSc Chemistry (in progress)")
     st.write("🏛 University of Limpopo")
     st.write("📧 201912820@myturf.ul.ac.za")
     st.write("Research Area: ATR-FTIR | Water Quality | Chemometrics")

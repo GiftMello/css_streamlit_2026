@@ -59,20 +59,11 @@ def researcher_profile():
         - Irrigation and environmental water sources  
         """)
 
-    with col2:
-        st.image(
-            "https://images.unsplash.com/photo-1501004318641-b39e6451bec6",
-            use_column_width=True
-        )
-
 
 def research_data():
     st.title("💧 Research Data")
 
-    st.image(
-        "https://images.unsplash.com/photo-1509395176047-4a66953fd231",
-        use_column_width=True
-    )
+    
 
     st.subheader("Heavy Metal Concentrations (ppm)")
     st.dataframe(heavy_metal_data, use_container_width=True)
@@ -93,10 +84,6 @@ def research_data():
 def chemometric_analysis():
     st.title("📈 Chemometric Analysis")
 
-    st.image(
-        "https://images.unsplash.com/photo-1581092160562-40aa08e78837",
-        use_column_width=True
-    )
 
     analysis = st.radio(
         "Select analysis",
@@ -163,10 +150,6 @@ def publications():
 def contact():
     st.title("📬 Contact")
 
-    st.image(
-        "https://images.unsplash.com/photo-1521791136064-7986c2920216",
-        use_column_width=True
-    )
 
     st.write("📧 201912820@myturf.ul.ac.za")
     st.write("Research Area: ATR-FTIR • Water Quality • Chemometrics")

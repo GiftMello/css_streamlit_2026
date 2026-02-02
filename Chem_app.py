@@ -226,4 +226,220 @@ with potential application in environmental monitoring and decision support.
 # CONTACT
 # =========================================================
 st.header("Contact Information")
-st.write("📧 gift.mello@university.ac.za")
+st.write("📧 201912820@myturf.ul.ac.za")
+
+
+# =========================================================
+# PAGE CONFIG
+# =========================================================
+st.set_page_config(
+    page_title="ATR-FTIR Water Quality Research App",
+    layout="wide"
+)
+
+# =========================================================
+# SIDEBAR NAVIGATION
+# =========================================================
+st.sidebar.title("📊 Navigation")
+menu = st.sidebar.radio(
+    "Go to:",
+    [
+        "Researcher Profile",
+        "Research Data",
+        "Chemometric Analysis",
+        "Publications",
+        "Contact"
+    ],
+)
+
+st.sidebar.markdown("---")
+st.sidebar.caption("ATR-FTIR | Water Quality | South Africa")
+
+# =========================================================
+# DUMMY DATA (RESEARCH-ALIGNED)
+# =========================================================
+
+# Heavy metal concentrations (ppm)
+heavy_metal_data = pd.DataFrame({
+    "Sample ID": ["IRR-01", "IRR-02", "MIN-01", "RIV-01", "DAM-01"],
+    "Pb (ppm)": [0.05, 0.12, 0.30, 0.08, 0.15],
+    "Cr (ppm)": [0.02, 0.06, 0.18, 0.05, 0.09],
+    "Zn (ppm)": [0.50, 0.75, 1.20, 0.65, 0.90],
+    "Fe (ppm)": [1.8, 2.4, 5.6, 2.1, 3.2],
+    "As (ppm)": [0.01, 0.03, 0.07, 0.02, 0.04],
+    "Source Type": ["Irrigation", "Irrigation", "Mining", "River", "Dam"]
+})
+
+# ATR-FTIR absorbance features
+ftir_spectra = pd.DataFrame({
+    "3400 cm⁻¹ (O–H)": [0.82, 0.76, 0.91, 0.80, 0.85],
+    "2920 cm⁻¹ (C–H)": [0.40, 0.35, 0.50, 0.38, 0.42],
+    "1630 cm⁻¹ (H–O–H)": [0.65, 0.60, 0.78, 0.63, 0.70],
+    "1030 cm⁻¹ (C–O/Si–O)": [0.70, 0.68, 0.88, 0.72, 0.75],
+    "520 cm⁻¹ (Metal–O)": [0.30, 0.28, 0.45, 0.32, 0.34]
+}, index=heavy_metal_data["Sample ID"])
+
+# =========================================================
+# RESEARCHER PROFILE
+# =========================================================
+if menu == "Researcher Profile":
+
+    st.title("👩🏽‍🔬 Researcher Profile")
+
+    name = "Gift Mello"
+    field = "Environmental Chemistry & Spectroscopy"
+    institution = "University of [Your Institution]"
+
+    st.write(f"**Name:** {name}")
+    st.write(f"**Field:** {field}")
+    st.write(f"**Institution:** {institution}")
+
+    st.image(
+        "https://cdn.pixabay.com/photo/2017/08/01/00/18/water-2563199_1280.jpg",
+        caption="Water quality monitoring",
+        use_column_width=True
+    )
+
+    st.markdown("""
+    **Research Focus**
+    - ATR-FTIR spectroscopy for water quality assessment  
+    - Heavy metal detection in irrigation and environmental waters  
+    - Chemometric analysis (PCA & calibration models)  
+    - Application to South African water sources  
+    """)
+
+# =========================================================
+# RESEARCH DATA
+# =========================================================
+elif menu == "Research Data":
+
+    st.title("💧 Water Quality Data")
+
+    st.subheader("Heavy Metal Concentrations (ppm)")
+    st.dataframe(heavy_metal_data, use_container_width=True)
+
+    metal = st.selectbox(
+        "Select metal to visualize",
+        ["Pb (ppm)", "Cr (ppm)", "Zn (ppm)", "Fe (ppm)", "As (ppm)"]
+    )
+
+    st.bar_chart(
+        heavy_metal_data.set_index("Sample ID")[metal]
+    )
+
+    st.subheader("ATR-FTIR Spectral Features")
+    st.dataframe(ftir_spectra, use_container_width=True)
+
+# =========================================================
+# CHEMOMETRIC ANALYSIS (NUMPY-BASED)
+# =========================================================
+elif menu == "Chemometric Analysis":
+
+    st.title("📈 Chemometric Analysis")
+
+    st.markdown("""
+    This section demonstrates exploratory and calibration-style analysis
+    of ATR-FTIR spectral data for water quality assessment.
+    """)
+
+    analysis = st.radio(
+        "Select analysis type",
+        ["PCA (Exploratory)", "Calibration Demo"]
+    )
+
+    # ---------- PCA ----------
+    if analysis == "PCA (Exploratory)":
+
+        X = ftir_spectra.values
+        X_centered = X - np.mean(X, axis=0)
+
+        cov = np.cov(X_centered, rowvar=False)
+        eigvals, eigvecs = np.linalg.eigh(cov)
+
+        idx = np.argsort(eigvals)[::-1]
+        eigvals = eigvals[idx]
+        eigvecs = eigvecs[:, idx]
+
+        scores = X_centered @ eigvecs[:, :2]
+        variance = eigvals / np.sum(eigvals)
+
+        pca_scores = pd.DataFrame(
+            scores,
+            columns=["PC1", "PC2"],
+            index=ftir_spectra.index
+        )
+
+        st.subheader("PCA Scores")
+        st.dataframe(pca_scores)
+        st.bar_chart(pca_scores)
+
+        st.write(
+            f"**Explained Variance:** PC1 = {variance[0]*100:.2f}% | "
+            f"PC2 = {variance[1]*100:.2f}%"
+        )
+
+    # ---------- CALIBRATION DEMO ----------
+    else:
+        target = st.selectbox(
+            "Select target metal",
+            ["Pb (ppm)", "Cr (ppm)", "Zn (ppm)", "Fe (ppm)", "As (ppm)"]
+        )
+
+        X = ftir_spectra.values.mean(axis=1)
+        y = heavy_metal_data[target].values
+
+        coeffs = np.polyfit(X, y, 1)
+        y_pred = np.polyval(coeffs, X)
+
+        results = pd.DataFrame({
+            "Measured (ppm)": y,
+            "Predicted (ppm)": y_pred
+        }, index=ftir_spectra.index)
+
+        st.subheader("Measured vs Predicted")
+        st.dataframe(results)
+        st.line_chart(results)
+
+        rmse = np.sqrt(np.mean((y - y_pred) ** 2))
+        st.success(f"Calibration RMSE = {rmse:.3f} ppm")
+
+# =========================================================
+# PUBLICATIONS
+# =========================================================
+elif menu == "Publications":
+
+    st.title("📚 Publications / Outputs")
+
+    uploaded_file = st.file_uploader(
+        "Upload publications or results (CSV)",
+        type="csv"
+    )
+
+    if uploaded_file:
+        df = pd.read_csv(uploaded_file)
+        st.dataframe(df)
+
+        keyword = st.text_input("Filter by keyword")
+        if keyword:
+            filtered = df[
+                df.apply(
+                    lambda r: keyword.lower() in r.astype(str).str.lower().values,
+                    axis=1
+                )
+            ]
+            st.dataframe(filtered)
+
+# =========================================================
+# CONTACT
+# =========================================================
+elif menu == "Contact":
+
+    st.title("📬 Contact Information")
+
+    st.write("**Email:** 201912820@myturf.ul.ac.za")
+    st.write("**Research Area:** ATR-FTIR | Water Quality | Chemometrics")
+
+    st.markdown(
+        "For academic collaboration or research enquiries, please get in touch."
+    )
+

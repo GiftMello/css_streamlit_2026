@@ -136,6 +136,29 @@ analysis_type = st.radio(
 )
 
 # ---------------- PCA ----------------
+def numpy_pca(X, n_components=2):
+    # Mean center
+    X_centered = X - np.mean(X, axis=0)
+
+    # Covariance matrix
+    cov_matrix = np.cov(X_centered, rowvar=False)
+
+    # Eigen decomposition
+    eigenvalues, eigenvectors = np.linalg.eigh(cov_matrix)
+
+    # Sort descending
+    sorted_idx = np.argsort(eigenvalues)[::-1]
+    eigenvalues = eigenvalues[sorted_idx]
+    eigenvectors = eigenvectors[:, sorted_idx]
+
+    # Select components
+    components = eigenvectors[:, :n_components]
+    scores = X_centered @ components
+
+    explained_variance = eigenvalues / np.sum(eigenvalues)
+
+    return scores, explained_variance[:n_components]
+
 if analysis_type == "Principal Component Analysis (PCA)":
 
     st.subheader("PCA of ATR-FTIR Spectra")
@@ -171,14 +194,7 @@ if analysis_type == "Principal Component Analysis (PCA)":
 
 # ---------------- PLS ----------------
 else:
-    st.subheader("PLS Regression: FTIR vs Heavy Metals")
-
-    st.markdown("""
-    **Objective:**  
-    - Develop calibration models  
-    - Predict heavy metal concentrations from FTIR spectra  
-    - Demonstrate rapid screening potential
-    """)
+    st.subheader("FTIR-Based Calibration (Linear Demonstration)")
 
     target = st.selectbox(
         "Select target metal",
@@ -188,13 +204,11 @@ else:
     X = ftir_spectra.values
     y = heavy_metal_data[target].values
 
-    pls = PLSRegression(n_components=2)
-    pls.fit(X, y)
+    # Simple linear regression using numpy
+    X_aug = np.c_[np.ones(X.shape[0]), X.mean(axis=1)]
+    coeffs = np.linalg.lstsq(X_aug, y, rcond=None)[0]
 
-    y_pred = pls.predict(X).ravel()
-
-    r2 = r2_score(y, y_pred)
-    rmse = np.sqrt(mean_squared_error(y, y_pred))
+    y_pred = X_aug @ coeffs
 
     results = pd.DataFrame({
         "Measured (ppm)": y,
@@ -202,14 +216,14 @@ else:
     }, index=ftir_spectra.index)
 
     st.dataframe(results)
-
     st.line_chart(results)
 
-    st.success(f"Model Performance → R² = {r2:.3f} | RMSE = {rmse:.3f}")
+    rmse = np.sqrt(np.mean((y - y_pred)**2))
+    st.success(f"Calibration RMSE = {rmse:.3f} ppm")
 
     st.caption(
-        "This calibration is demonstrative. "
-        "Robust models require independent validation and larger datasets."
+        "Demonstration calibration using FTIR spectral intensity averages. "
+        "Advanced PLS models require external libraries and validation data."
     )
 
 # =========================================================

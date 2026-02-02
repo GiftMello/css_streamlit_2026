@@ -13,7 +13,7 @@ import numpy as np
 # APP CONFIG
 # =========================================================
 st.set_page_config(
-    page_title="ATR-FTIR Water Quality Dashboard",
+    page_title="ATR-FTIR Water Quality Research App",
     layout="wide"
 )
 
@@ -240,23 +240,23 @@ st.set_page_config(
 # =========================================================
 # SIDEBAR NAVIGATION
 # =========================================================
-st.sidebar.title("📊 Navigation")
+st.sidebar.title("🔍 Navigation")
 menu = st.sidebar.radio(
-    "Go to:",
-    [
+    "Select Section",
+    (
         "Researcher Profile",
         "Research Data",
         "Chemometric Analysis",
         "Publications",
         "Contact"
-    ],
+    )
 )
 
 st.sidebar.markdown("---")
 st.sidebar.caption("ATR-FTIR | Water Quality | South Africa")
 
 # =========================================================
-# DUMMY DATA (RESEARCH-ALIGNED)
+# PRELIMINARY DATA
 # =========================================================
 
 # Heavy metal concentrations (ppm)
@@ -286,27 +286,27 @@ if menu == "Researcher Profile":
 
     st.title("👩🏽‍🔬 Researcher Profile")
 
-    name = "Gift Mello"
-    field = "Environmental Chemistry & Spectroscopy"
-    institution = "University of [Your Institution]"
+    col1, col2 = st.columns([2, 1])
 
-    st.write(f"**Name:** {name}")
-    st.write(f"**Field:** {field}")
-    st.write(f"**Institution:** {institution}")
+    with col1:
+        st.write("**Name:** Gift Mello")
+        st.write("**Field:** Environmental Chemistry & Spectroscopy")
+        st.write("**Institution:** University of [Your Institution]")
 
-    st.image(
-        "https://cdn.pixabay.com/photo/2017/08/01/00/18/water-2563199_1280.jpg",
-        caption="Water quality monitoring",
-        use_column_width=True
-    )
+        st.markdown("""
+        **Research Focus**
+        - ATR-FTIR spectroscopy  
+        - Heavy metal contamination in water  
+        - Chemometric data analysis  
+        - Irrigation and environmental water sources  
+        """)
 
-    st.markdown("""
-    **Research Focus**
-    - ATR-FTIR spectroscopy for water quality assessment  
-    - Heavy metal detection in irrigation and environmental waters  
-    - Chemometric analysis (PCA & calibration models)  
-    - Application to South African water sources  
-    """)
+    with col2:
+        st.image(
+            "https://images.unsplash.com/photo-1501004318641-b39e6451bec6",
+            caption="Water quality research",
+            use_column_width=True
+        )
 
 # =========================================================
 # RESEARCH DATA
@@ -314,6 +314,12 @@ if menu == "Researcher Profile":
 elif menu == "Research Data":
 
     st.title("💧 Water Quality Data")
+
+    st.image(
+        "https://images.unsplash.com/photo-1509395176047-4a66953fd231",
+        caption="Sampling of environmental water sources",
+        use_column_width=True
+    )
 
     st.subheader("Heavy Metal Concentrations (ppm)")
     st.dataframe(heavy_metal_data, use_container_width=True)
@@ -331,19 +337,20 @@ elif menu == "Research Data":
     st.dataframe(ftir_spectra, use_container_width=True)
 
 # =========================================================
-# CHEMOMETRIC ANALYSIS (NUMPY-BASED)
+# CHEMOMETRIC ANALYSIS 
 # =========================================================
 elif menu == "Chemometric Analysis":
 
     st.title("📈 Chemometric Analysis")
 
-    st.markdown("""
-    This section demonstrates exploratory and calibration-style analysis
-    of ATR-FTIR spectral data for water quality assessment.
-    """)
+    st.image(
+        "https://images.unsplash.com/photo-1581092160562-40aa08e78837",
+        caption="Spectroscopic and data analysis workflow",
+        use_column_width=True
+    )
 
     analysis = st.radio(
-        "Select analysis type",
+        "Choose analysis type",
         ["PCA (Exploratory)", "Calibration Demo"]
     )
 
@@ -351,95 +358,85 @@ elif menu == "Chemometric Analysis":
     if analysis == "PCA (Exploratory)":
 
         X = ftir_spectra.values
-        X_centered = X - np.mean(X, axis=0)
-
-        cov = np.cov(X_centered, rowvar=False)
+        Xc = X - np.mean(X, axis=0)
+        cov = np.cov(Xc, rowvar=False)
         eigvals, eigvecs = np.linalg.eigh(cov)
 
         idx = np.argsort(eigvals)[::-1]
         eigvals = eigvals[idx]
         eigvecs = eigvecs[:, idx]
 
-        scores = X_centered @ eigvecs[:, :2]
-        variance = eigvals / np.sum(eigvals)
+        scores = Xc @ eigvecs[:, :2]
+        var = eigvals / np.sum(eigvals)
 
         pca_scores = pd.DataFrame(
-            scores,
-            columns=["PC1", "PC2"],
-            index=ftir_spectra.index
+            scores, columns=["PC1", "PC2"], index=ftir_spectra.index
         )
 
         st.subheader("PCA Scores")
         st.dataframe(pca_scores)
         st.bar_chart(pca_scores)
 
-        st.write(
-            f"**Explained Variance:** PC1 = {variance[0]*100:.2f}% | "
-            f"PC2 = {variance[1]*100:.2f}%"
+        st.info(
+            f"Explained Variance → PC1: {var[0]*100:.2f}% | PC2: {var[1]*100:.2f}%"
         )
 
-    # ---------- CALIBRATION DEMO ----------
+    # ---------- CALIBRATION ----------
     else:
         target = st.selectbox(
-            "Select target metal",
+            "Target metal",
             ["Pb (ppm)", "Cr (ppm)", "Zn (ppm)", "Fe (ppm)", "As (ppm)"]
         )
 
-        X = ftir_spectra.values.mean(axis=1)
+        X = ftir_spectra.mean(axis=1).values
         y = heavy_metal_data[target].values
 
-        coeffs = np.polyfit(X, y, 1)
-        y_pred = np.polyval(coeffs, X)
+        coeff = np.polyfit(X, y, 1)
+        y_pred = np.polyval(coeff, X)
 
         results = pd.DataFrame({
             "Measured (ppm)": y,
             "Predicted (ppm)": y_pred
         }, index=ftir_spectra.index)
 
-        st.subheader("Measured vs Predicted")
+        st.subheader("Calibration Results")
         st.dataframe(results)
         st.line_chart(results)
 
-        rmse = np.sqrt(np.mean((y - y_pred) ** 2))
-        st.success(f"Calibration RMSE = {rmse:.3f} ppm")
+        rmse = np.sqrt(np.mean((y - y_pred)**2))
+        st.success(f"RMSE = {rmse:.3f} ppm")
 
 # =========================================================
 # PUBLICATIONS
 # =========================================================
 elif menu == "Publications":
 
-    st.title("📚 Publications / Outputs")
+    st.title("📚 Publications & Outputs")
 
-    uploaded_file = st.file_uploader(
-        "Upload publications or results (CSV)",
-        type="csv"
+    st.image(
+        "https://images.unsplash.com/photo-1517976487492-5750f3195933",
+        caption="Scientific research and publication",
+        use_column_width=True
     )
 
-    if uploaded_file:
-        df = pd.read_csv(uploaded_file)
+    uploaded = st.file_uploader("Upload CSV", type="csv")
+    if uploaded:
+        df = pd.read_csv(uploaded)
         st.dataframe(df)
-
-        keyword = st.text_input("Filter by keyword")
-        if keyword:
-            filtered = df[
-                df.apply(
-                    lambda r: keyword.lower() in r.astype(str).str.lower().values,
-                    axis=1
-                )
-            ]
-            st.dataframe(filtered)
 
 # =========================================================
 # CONTACT
 # =========================================================
 elif menu == "Contact":
 
-    st.title("📬 Contact Information")
+    st.title("📬 Contact")
 
-    st.write("**Email:** 201912820@myturf.ul.ac.za")
-    st.write("**Research Area:** ATR-FTIR | Water Quality | Chemometrics")
-
-    st.markdown(
-        "For academic collaboration or research enquiries, please get in touch."
+    st.image(
+        "https://images.unsplash.com/photo-1521791136064-7986c2920216",
+        caption="Academic collaboration",
+        use_column_width=True
     )
+
+    st.write("**Email:** gift.mello@university.ac.za")
+    st.write("**Research Area:** ATR-FTIR • Water Quality • Chemometrics")
 

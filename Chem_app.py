@@ -61,7 +61,7 @@ def researcher_profile():
         """)
 
 def research_data():
-    st.title("💧 Research Data (Preliminary data")
+    st.title("💧 Research Data (Preliminary data)")
 
     st.subheader("Heavy Metal Concentrations (ppm)")
     st.dataframe(heavy_metal_data, use_container_width=True)
@@ -138,12 +138,7 @@ def chemometric_analysis():
 
 def publications():
     st.title("📚 Publications")
-
-    uploaded = st.file_uploader("", type="")
-    if uploaded:
-        df = pd.read_csv(uploaded)
-        st.dataframe(df)
-
+    st.write("Gift Mello, Kwena D. Modibane, Goodman Jezile, Daniel Masekela,“Quantitative analysis of heavy metal pollution using FTIR-ATR coupled with chemometric models’’(Submitted for publication in Discover Applied Sciences)")
 
 def contact():
     st.title("📬 Contact")

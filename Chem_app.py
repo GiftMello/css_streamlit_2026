@@ -49,6 +49,7 @@ def researcher_profile():
     with col1:
         st.write("**Name:** Gift Mello")
         st.write("**Field:** Environmental Chemistry & Spectroscopy")
+        
         st.write("**Institution:** University of Limpopo")
 
         st.markdown("""
@@ -59,11 +60,8 @@ def researcher_profile():
         - Irrigation and environmental water sources  
         """)
 
-
 def research_data():
-    st.title("💧 Research Data")
-
-    
+    st.title("💧 Research Data (Preliminary data")
 
     st.subheader("Heavy Metal Concentrations (ppm)")
     st.dataframe(heavy_metal_data, use_container_width=True)
@@ -87,10 +85,10 @@ def chemometric_analysis():
 
     analysis = st.radio(
         "Select analysis",
-        ["PCA (Exploratory)", "Calibration Demo"]
+        ["PCA Analysis ", " PLSR Calibration Models"]
     )
 
-    if analysis == "PCA (Exploratory)":
+    if analysis == "PCA":
         X = ftir_spectra.values
         Xc = X - np.mean(X, axis=0)
         cov = np.cov(Xc, rowvar=False)
@@ -141,7 +139,7 @@ def chemometric_analysis():
 def publications():
     st.title("📚 Publications")
 
-    uploaded = st.file_uploader("Upload CSV", type="csv")
+    uploaded = st.file_uploader("", type="")
     if uploaded:
         df = pd.read_csv(uploaded)
         st.dataframe(df)
@@ -149,10 +147,11 @@ def publications():
 
 def contact():
     st.title("📬 Contact")
-
-
+    st.write("👨🏻‍🔬 Gift Mello")
+    st.write("✍🏻 BSc (Physical Sciences), BSc Hons (Chemistry) (with distiction), MSc Chemistry (in progress)")
+    st.write("🏛 University of Limpopo")
     st.write("📧 201912820@myturf.ul.ac.za")
-    st.write("Research Area: ATR-FTIR • Water Quality • Chemometrics")
+    st.write("Research Area: ATR-FTIR | Water Quality | Chemometrics")
 
 # =========================================================
 # SIDEBAR NAVIGATION CONTROLLER

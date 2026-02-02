@@ -9,11 +9,6 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 
-from sklearn.decomposition import PCA
-from sklearn.preprocessing import StandardScaler
-from sklearn.cross_decomposition import PLSRegression
-from sklearn.metrics import r2_score, mean_squared_error
-
 # =========================================================
 # APP CONFIG
 # =========================================================
@@ -161,20 +156,10 @@ def numpy_pca(X, n_components=2):
 
 if analysis_type == "Principal Component Analysis (PCA)":
 
-    st.subheader("PCA of ATR-FTIR Spectra")
+    st.subheader("PCA of ATR-FTIR Spectra (NumPy Implementation)")
 
-    st.markdown("""
-    **Objective:**  
-    - Reduce spectral dimensionality  
-    - Identify clustering and variance patterns  
-    - Explore contamination-related spectral differences
-    """)
-
-    scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(ftir_spectra)
-
-    pca = PCA(n_components=2)
-    scores = pca.fit_transform(X_scaled)
+    X = ftir_spectra.values
+    scores, var = numpy_pca(X, n_components=2)
 
     pca_scores = pd.DataFrame(
         scores,
@@ -183,14 +168,13 @@ if analysis_type == "Principal Component Analysis (PCA)":
     )
 
     st.dataframe(pca_scores)
-
     st.bar_chart(pca_scores)
 
     st.write(
         f"**Explained Variance:** "
-        f"PC1 = {pca.explained_variance_ratio_[0]*100:.2f}% | "
-        f"PC2 = {pca.explained_variance_ratio_[1]*100:.2f}%"
+        f"PC1 = {var[0]*100:.2f}% | PC2 = {var[1]*100:.2f}%"
     )
+
 
 # ---------------- PLS ----------------
 else:
